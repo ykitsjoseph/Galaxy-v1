@@ -1,0 +1,224 @@
+
+--========================================
+--          SCOOTER V1
+--       PURPLE GALAXY EDITION
+--========================================
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+
+local PURPLE = Color3.fromRGB(155, 65, 255)
+local DARK = Color3.fromRGB(12, 8, 20)
+local WHITE = Color3.fromRGB(245, 235, 255)
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "SCOOTER_V1"
+gui.ResetOnSpawn = false
+
+local success, err = pcall(function()
+    gui.Parent = game:GetService("CoreGui")
+end)
+
+if not success then
+    gui.Parent = player:WaitForChild("PlayerGui")
+end
+
+-- MAIN WINDOW
+
+local main = Instance.new("Frame")
+main.Size = UDim2.fromOffset(310, 225)
+main.Position = UDim2.new(0.5, -155, 0.5, -112)
+main.BackgroundColor3 = DARK
+main.BorderSizePixel = 0
+main.Active = true
+main.Draggable = true
+main.ClipsDescendants = true
+main.Parent = gui
+
+Instance.new("UICorner", main).CornerRadius =
+    UDim.new(0, 13)
+
+local stroke = Instance.new("UIStroke")
+stroke.Color = PURPLE
+stroke.Thickness = 2
+stroke.Parent = main
+
+-- STAR BACKGROUND
+
+local stars = Instance.new("Frame")
+stars.Size = UDim2.fromScale(1, 1)
+stars.BackgroundTransparency = 1
+stars.ZIndex = 1
+stars.Parent = main
+
+task.spawn(function()
+    while gui.Parent do
+        local star = Instance.new("TextLabel")
+        star.BackgroundTransparency = 1
+        star.Text = "✦"
+        star.TextColor3 = PURPLE
+        star.TextSize = math.random(10, 19)
+        star.Size = UDim2.fromOffset(20, 20)
+        star.Position = UDim2.new(
+            math.random(0, 100) / 100, 0, -0.1, 0
+        )
+        star.ZIndex = 1
+        star.Parent = stars
+
+        local tween = TweenService:Create(
+            star,
+            TweenInfo.new(
+                math.random(4, 8),
+                Enum.EasingStyle.Linear
+            ),
+            {
+                Position = UDim2.new(
+                    star.Position.X.Scale, 0, 1.1, 0
+                ),
+                TextTransparency = 0.8
+            }
+        )
+
+        tween:Play()
+        tween.Completed:Wait()
+        star:Destroy()
+    end
+end)
+
+-- HEADER
+
+local header = Instance.new("Frame")
+header.Size = UDim2.new(1, 0, 0, 43)
+header.BackgroundColor3 = Color3.fromRGB(35, 14, 55)
+header.BorderSizePixel = 0
+header.ZIndex = 3
+header.Parent = main
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -50, 1, 0)
+title.Position = UDim2.fromOffset(12, 0)
+title.BackgroundTransparency = 1
+title.Text = "✦ SCOOTER V1 ✦"
+title.TextColor3 = WHITE
+title.TextSize = 19
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.ZIndex = 4
+title.Parent = header
+
+-- CLOSE BUTTON
+
+local close = Instance.new("TextButton")
+close.Size = UDim2.fromOffset(35, 35)
+close.Position = UDim2.new(1, -40, 0, 4)
+close.Text = "X"
+close.TextColor3 = WHITE
+close.BackgroundColor3 = Color3.fromRGB(90, 30, 130)
+close.ZIndex = 5
+close.Parent = header
+
+Instance.new("UICorner", close).CornerRadius =
+    UDim.new(0, 8)
+
+-- BUTTON CREATOR
+
+local function makeButton(text, y)
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(1, -30, 0, 40)
+    b.Position = UDim2.fromOffset(15, y)
+    b.BackgroundColor3 = Color3.fromRGB(48, 25, 70)
+    b.Text = text
+    b.TextColor3 = WHITE
+    b.TextSize = 14
+    b.Font = Enum.Font.GothamBold
+    b.ZIndex = 4
+    b.Parent = main
+
+    Instance.new("UICorner", b).CornerRadius =
+        UDim.new(0, 8)
+
+    local outline = Instance.new("UIStroke")
+    outline.Color = PURPLE
+    outline.Thickness = 1
+    outline.Parent = b
+
+    return b
+end
+
+-- WHEELIE CONTROLS
+
+local angle = 45
+local wheelie = false
+
+local WHEELIE_KEY = 0x11
+
+local function pressKey(key)
+    if typeof(keypress) == "function" then
+        pcall(keypress, key)
+    end
+end
+
+local function releaseKey(key)
+    if typeof(keyrelease) == "function" then
+        pcall(keyrelease, key)
+    end
+end
+
+local wheelieButton = makeButton("WHEELIE: OFF", 65)
+
+wheelieButton.MouseButton1Click:Connect(function()
+    wheelie = not wheelie
+
+    if wheelie then
+        pressKey(WHEELIE_KEY)
+    else
+        releaseKey(WHEELIE_KEY)
+    end
+
+    wheelieButton.Text =
+        "WHEELIE: " .. (wheelie and "ON" or "OFF")
+end)
+
+local angleButton = makeButton("WHEELIE ANGLE: 45°", 112)
+
+angleButton.MouseButton1Click:Connect(function()
+    angle = angle + 15
+
+    if angle > 90 then
+        angle = 30
+    end
+
+    angleButton.Text =
+        "WHEELIE ANGLE: " .. angle .. "°"
+end)
+
+-- FOOTER
+
+local footer = Instance.new("TextLabel")
+footer.Size = UDim2.new(1, 0, 0, 25)
+footer.Position = UDim2.fromOffset(0, 165)
+footer.BackgroundTransparency = 1
+footer.Text = "✦ PURPLE GALAXY EDITION ✦"
+footer.TextColor3 = PURPLE
+footer.TextSize = 12
+footer.Font = Enum.Font.GothamBold
+footer.ZIndex = 3
+footer.Parent = main
+
+-- CLEANUP
+
+local function cleanup()
+    wheelie = false
+    releaseKey(WHEELIE_KEY)
+    gui:Destroy()
+end
+
+close.MouseButton1Click:Connect(cleanup)
+
+gui.Destroying:Connect(function()
+    releaseKey(WHEELIE_KEY)
+end)
+
+print("SCOOTER V1 PURPLE GALAXY LOADED")
